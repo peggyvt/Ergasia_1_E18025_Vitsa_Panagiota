@@ -199,3 +199,32 @@ curl -X DELETE localhost:5000/deleteStudent -d '{"email":"tessagomez@ontagene.co
 ````
 
 <img src="images/7.jpg"/>
+
+<h3>Question 8</h3>
+<p>Here, the user has the ability to add courses to a specific student - based on their email, who belongs in the students collection.</p>
+
+ ````python
+ uuid = request.headers.get('Authorization') # Εισαγωγή uuid από τον χρήστη
+    if is_session_valid(uuid) : # Αν το uuid είναι valid, τότε εκτέλεση ερωτήματος
+        student = students.find_one({"email":data["email"]}) # Εύρεση μαθητή με το δωθέν email
+        if student != None: # Αν υπάρχει ο μαθητής, τότε εκχωρούνται τα μαθήματα του στα στοιχεία του
+            student = students.update_one({'email':data["email"]}, {'$set': {'courses':data["courses"]}}) # set: εκχώρηση των νέων στοιχείων μαθημάτων-βαθμών
+            msg = "Updated successfully" # Μήνυμα επιτυχίας σε μεταβλητή
+            return Response(msg, status=200, mimetype='application/json') # Εκτύπωση του προηγούμενου μηνύματος, εμφάνιση επιτυχούς status
+        else: # Αν δεν υπάρχει μαθητής, εκτύπωσε αντίστοιχο μήνυμα
+            return Response('No student found with the email.', status=500, mimetype='application/json')
+    else:
+        return Response("User has not been authenticated.", status=401, mimetype='application/json') # Ο χρήστης δεν έχει ταυτοποιηθεί
+ ````
+ 
+ <p>Only if the session is valid we can execute the question - otherwise it's gonna print a user unidentification message.<br/>The code searches if the email that the user entered exists in the students collection. If it exists, update the student's information for it to also include the courses with the grades the user entered in the command. Then, print a successful update type of message.<br/>If the email doesn't match someone's in the collection, a message with status 500 is printed.</p>
+ <p>Below, the command that successfully updates a student is shown:</p>
+ 
+ ````bash
+ curl -X PATCH localhost:5000/addCourses -d '{"email":"lewiscasey@ontagene.com", "courses": [ {"IT":6}, {"DB":9}, {"Mathematics":6} ]}' -H "Authorization: 8f66172c-b579-11eb-a9f3-0800271751e0" -H Content-Type:application/json
+ ````
+ 
+ <img src="images/8.1.jpg"/>
+ 
+ <p>Making sure that the courses really did get into the collection, we check with the help of a previous question, getStudent to get the student info:</p>
+ <img src="images/8.2.jpg"/>
