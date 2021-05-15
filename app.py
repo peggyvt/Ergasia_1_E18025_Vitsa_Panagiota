@@ -71,7 +71,7 @@ def create_user():
     # Διαφορετικά, αν υπάρχει ήδη κάποιος χρήστης με αυτό το username
     else:
         # Μήνυμα λάθους (Υπάρχει ήδη κάποιος χρήστης με αυτό το username)
-        return Response("A user with the given email already exists", status=400, mimetype='application/json') # Εμφάνιση status αποτυχίας
+        return Response("A user with the given username already exists", status=400, mimetype='application/json') # Εμφάνιση status αποτυχίας
 
 
 # ΕΡΩΤΗΜΑ 2: Login στο σύστημα
@@ -402,7 +402,7 @@ def get_courses():
                             passed[grade] = item.get(grade)
             if len(passed) != 0: # Αν το dictionary περασμένων έχει μαθήματα
                 return Response(student["name"] + json.dumps(passed), status=200, mimetype='application/json') # Εκτύπωση επιτυχούς μηνύματος και επιτυχούς status)
-            else: # Αν η λίστα περασμένων είναι άδεια
+            else: # Αν το dictionary περασμένων είναι άδειο
                 return Response("The student hasn't passed any courses.")
         else: # Δεν υπάρχει μαθητής που να έχει και το δωθέν email και τα μαθήματα
             student = students.find_one({"email":data["email"]}) # Ελέγχω αν υπάρχει το email
