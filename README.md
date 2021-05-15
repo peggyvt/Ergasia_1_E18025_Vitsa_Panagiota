@@ -221,10 +221,54 @@ curl -X DELETE localhost:5000/deleteStudent -d '{"email":"tessagomez@ontagene.co
  <p>Below, the command that successfully updates a student is shown:</p>
  
  ````bash
- curl -X PATCH localhost:5000/addCourses -d '{"email":"lewiscasey@ontagene.com", "courses": [ {"IT":6}, {"DB":9}, {"Mathematics":6} ]}' -H "Authorization: 8f66172c-b579-11eb-a9f3-0800271751e0" -H Content-Type:application/json
+ curl -X PATCH localhost:5000/addCourses -d '{"email":"lottieherring@ontagene.com", "courses": [ {"IT":6}, {"DB":9}, {"Mathematics":4}, {"Java":2} ]}' -H "Authorization: 76b69678-b585-11eb-b44f-0800271751e0" -H Content-Type:application/json
  ````
  
  <img src="images/8.1.jpg"/>
  
- <p>Making sure that the courses really did get into the collection, we check with the help of a previous question, getStudent to get the student info:</p>
+ <p>Making sure that the courses really did get into the collection, we check with the help of a previous question, getStudent, to get the student info:</p>
  <img src="images/8.2.jpg"/>
+
+<h3>Question 9</h3>
+<p>Here, the user has the ability get the passed courses of a specific student - based on their email, who belongs in the students collection.</p>
+
+ ````python
+ uuid = request.headers.get('Authorization') # Εισαγωγή uuid από τον χρήστη
+    if is_session_valid(uuid) : # Αν το uuid είναι valid, τότε εκτέλεση ερωτήματος
+        student = students.find_one({"$and":[ {"email":data["email"]}, {"courses":{"$ne":None}} ]}) # Εύρεση μαθητή που έχει το δωθέν email και έχει εκχωρημένα μαθήματα
+        if student != None: # Αν υπάρχει ο μαθητής, τότε εκχωρούνται τα μαθήματα του στα στοιχεία του
+            student['_id'] = None
+            courses = {'courses':student["courses"]} # Δημιουργία courses για να μπορούν να προσπελαστούν τα μαθήματα ένα-ένα στην επανάληψη
+            passed = {} # Δημιουργία κενού dictionary, στο οποίο θα εισαχθούν τα περασμένα μαθήματα του μαθητή
+            for course in courses.values(): # Για κάθε μάθημα, επανάληψη
+                for item in course:
+                    for grade in item:
+                        if item.get(grade) >= 5: # Αν ο βαθμός είναι περασμένος, τότε εκχωρείται στο dictionary passed
+                            passed[grade] = item.get(grade)
+            if len(passed) != 0: # Αν το dictionary περασμένων έχει μαθήματα
+                return Response(student["name"] + json.dumps(passed), status=200, mimetype='application/json') # Εκτύπωση επιτυχούς μηνύματος και επιτυχούς status)
+            else: # Αν το dictionary περασμένων είναι άδειο
+                return Response("The student hasn't passed any courses.")
+        else: # Δεν υπάρχει μαθητής που να έχει και το δωθέν email και τα μαθήματα
+            student = students.find_one({"email":data["email"]}) # Ελέγχω αν υπάρχει το email
+            if student == None: # Αν δεν υπάρχει το email, τότε δεν υπάρχει μαθητής
+                return Response("There is no student with that email.")
+            else: # Αν υπάρχει το email, τότε ο συγκεκριμένος μαθητής δεν έχει εισάγει μαθήματα
+                return Response("The student with the email you entered has no courses.")
+    else:
+        return Response("User has not been authenticated.", status=401, mimetype='application/json') # Ο χρήστης δεν έχει ταυτοποιηθεί
+````
+
+<p>If the session is valid, then a search is performed in order to find one student with the email the user entered, who also has courses and grades in their information. If we find one, then we create an empty dictionary named passed in which the passed courses will be entered. For each course in the courses, we check if the grade is 5 or more. If it is, then the grade enters the dictionary <i>passed</i>.<br/>If the length of the dictionary is zero, then the student has not passed any courses.</p>
+<p>If we don't find a student that has both the given email by the user and non-empty courses, we check if there is a student with just that email, in order to get the user more accurate response messages. If the email doesn't exist, then there is no student in the collection.</p>
+<p>The command that successfully shows the passed courses of a student is:</p>
+
+````bash
+curl -X GET localhost:5000/getPassedCourses -d '{"email":"lottieherring@ontagene.com"}' -H "Authorization: b6923640-b589-11eb-b385-0800271751e0" -H Content-Type:application/json
+````
+
+<img src="images/9.1.jpg"/>
+
+<p>For the sake of checking if a student doesn't have any passed courses, we will update a random student with grades below 5, just to see the correct response message pop up.</p>
+
+<img src="images/9.2.jpg"/>
