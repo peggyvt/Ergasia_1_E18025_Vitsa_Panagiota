@@ -1,4 +1,4 @@
-<h1>Ergasia_1_E18025_Vitsa_Panagiota</h1>
+<h1>Basic Entrypoints in Python</h1>
 
 <h2>Introduction</h2>
 <p>This project is made possible with a mongodb database and flask. The execution of this application took place in linux, kali. It is written in python 3. The main goal was to implement various entrypoints, such as get, post, delete and patch.</p>
